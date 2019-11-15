@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+	<meta charset="UTF-8">
+	<title>搜索</title>
+	<link media="all" rel="stylesheet" th:href="@{/layui/css/layui.css}">
+</head>
+<body>
+<div class="layui-container" style="margin: 0px;width: 100%;">
+	<div class="layui-row" style="margin-top: 10px;">
+		<div class="layui-col-md6 layui-col-lg-offset4">
+			<div class="layui-input-inline">
+				<input autocomplete="off" class="layui-input" id="keyword"
+					   name="keyword" placeholder="关键字" style="height: 30px;width: 250px;" type="text">
+			</div>
+			<button class="layui-btn layui-btn-sm" id="searchBtn" type="button">
+				<i class="layui-icon layui-icon-search "></i>
+			</button>
+			<button class="layui-btn layui-btn-normal layui-btn-sm" id="uploadBtn" style="margin-left: 0px;" type="button">
+				<i class="layui-icon layui-icon-upload "></i>
+			</button>
+		</div>
+	</div>
+	<div class="layui-row">
+		<table class="layui-hide" id="bookMarkTable"></table>
+	</div>
+</div>
+</body>
+<script charset="utf-8" th:src="@{/layui/layui.js}"></script>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    //获取项目根目录
+    var _baseUrl = /*[[@{/}]]*/;
+    /*]]>*/
+</script>
+<script id="iconCol" type="text/html">
+	<a href="{{d.url}}" target="_blank" style="color: cornflowerblue;display: block;width: 100%;">
+		{{#  if(d.icon != "" && d.icon != null){ }}
+		<img src="{{d.icon}}" style="width: 16px;">
+		{{#  } }}
+		{{# if(d.title != "" && d.title != null){ }}
+		{{d.title}}
+		{{# }else{ }}
+		{{d.url}}
+		{{# } }}
+	</a>
+
+</script>
+<script th:inline="none" type="text/javascript">
+    layui.use(['upload', 'table'], function () {
+        var $ = layui.jquery;
+        var upload = layui.upload;
+        var table = layui.table;
+
+        upload.render({
+            elem: '#uploadBtn'
+            , url: _baseUrl + 'upload'
+            , accept: 'file' //普通文件
+            , done: function (res) {
+                layer.alert("导入完成!")
+            }
+        });
+
+        $("#searchBtn").click(function () {
+            var keyword = $("#keyword").val();
+            table.reload("bookMarkTable", {
+                where: {"keyword": keyword}
+            });
+        });
+
+        $(document).keydown(function (event) {
+            if (event.keyCode == 13) {
+                var keyword = $("#keyword").val();
+                debugger;
+                table.reload("bookMarkTable", {
+                    where: {"keyword": keyword}
+                });
+                return false;
+            }
+        });
+
+        table.render({
+            elem: '#bookMarkTable'
+            , id: 'bookMarkTable'
+            , url: _baseUrl + "list?keyword="
+            , size: "sm"
+            , height: 'full-60'
+            , cols: [[
+                 // {field: 'remark', title: '备注', minWidth: 80}
+                {field: 'iconCol', title: '网址', templet: "#iconCol", minWidth: 80}
+                // , {field: 'title', title: '标题', minWidth: 80}
+                // , {field: 'description', title: '描述', minWidth: 80}
+                // , {field: 'keywords', title: '关键字', minWidth: 80}
+            ]]
+        });
+
+    });
+</script>
+</html>
