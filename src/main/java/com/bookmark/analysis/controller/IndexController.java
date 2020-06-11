@@ -25,6 +25,7 @@ import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -41,6 +42,22 @@ public class IndexController {
 
 	@RequestMapping("/")
 	public ModelAndView index(Model model, HttpSession session) {
+//		List<Website> websites = websiteService.findAll();
+//		websites.parallelStream().forEach(website -> {
+//			try {
+//				URL baseUrl = new URL(website.getUrl());
+//				Document doc = Jsoup.connect(baseUrl.getProtocol()+"://"+baseUrl.getHost()).get();
+//				Elements body = doc.getElementsByTag("body");
+//				String title = doc.head().select("title").text();
+//				website.setDomain(baseUrl.getHost());
+//				website.setDomainTitle(title);
+//			} catch (MalformedURLException e) {
+//				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+//		});
+//		websiteService.saveAll(websites);
 		return new ModelAndView("/index");
 	}
 
@@ -57,6 +74,8 @@ public class IndexController {
 			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("remark"), ""), "%" + finalKeyword + "%"));
 			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("description"), ""), "%" + finalKeyword + "%"));
 			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("keywords"), ""), "%" + finalKeyword + "%"));
+			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("domain"), ""), "%" + finalKeyword + "%"));
+			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("domainTitle"), ""), "%" + finalKeyword + "%"));
 			return criteriaBuilder.or(predicates.toArray(new Predicate[predicates.size()]));
 		},pageable).getContent();
 
@@ -120,6 +139,12 @@ public class IndexController {
 					website.setIcon(icon);
 					website.setDescription(description);
 					website.setTitle(StringUtils.defaultIfBlank(title, "空白"));
+
+					URL baseUrl = new URL(website.getUrl());
+					Document baseDoc = Jsoup.connect(baseUrl.getProtocol()+"://"+baseUrl.getHost()).get();
+					String baseTitle = baseDoc.head().select("title").text();
+					website.setDomain(baseUrl.getHost());
+					website.setDomainTitle(baseTitle);
 					log.info("over url:{}", url);
 				} catch (Exception e) {
 					log.error(e.getMessage() + "url:" + url);

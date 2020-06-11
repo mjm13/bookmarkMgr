@@ -28,5 +28,9 @@ public class Website extends BaseEntity<String> {
 	@Field
 	private String url;
 
+	private String domain;
+
+	private String domainTitle;
+
 	private String icon;
 }
