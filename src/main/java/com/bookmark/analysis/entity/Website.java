@@ -6,6 +6,7 @@ import org.hibernate.search.annotations.Indexed;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.util.Date;
 
 /**
  * @author mjm
@@ -33,4 +34,6 @@ public class Website extends BaseEntity<String> {
 	private String domainTitle;
 
 	private String icon;
+
+	private Date pageDate;
 }

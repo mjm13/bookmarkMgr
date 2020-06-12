@@ -1,9 +1,11 @@
 package com.bookmark.analysis.controller;
 
+import cn.hutool.core.date.DatePattern;
 import com.bookmark.analysis.entity.Website;
 import com.bookmark.analysis.services.WebsiteService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -120,9 +122,12 @@ public class IndexController {
 			websites = websites.stream().parallel().peek(website -> {
 				String url = website.getUrl();
 				try {
-					Document doc = Jsoup.connect(url).get();
+					Connection connect = Jsoup.connect(url).userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31");;
+					Document doc = connect.get();
+
+					Connection.Response response = connect.response();
 					Elements body = doc.getElementsByTag("body");
-					String title = doc.head().select("title").text();
+					String title = doc.title();
 					String keywords = doc.head().select("meta[name=keywords]").attr("content");
 					String description = doc.head().select("meta[name=description]").attr("content");
 					String icon = doc.head().select("link[type=image/x-icon]").attr("href");
@@ -130,7 +135,7 @@ public class IndexController {
 					icon = StringUtils.defaultIfBlank(icon, icon2);
 					if (!icon.startsWith("http")) {
 						java.net.URL url1 = new URL(url);
-						icon = "http://" + url1.getHost() + icon;
+						icon = "http://" + url1.getHost() +"/"+ icon;
 					}
 
 					String title2 = body.select("title").text();
@@ -145,12 +150,20 @@ public class IndexController {
 					String baseTitle = baseDoc.head().select("title").text();
 					website.setDomain(baseUrl.getHost());
 					website.setDomainTitle(baseTitle);
+
+					String pageDateStr = response.headers().get("Date");
+					if(StringUtils.isNotBlank(pageDateStr)){
+						Date pageDate= DatePattern.HTTP_DATETIME_FORMAT.parse(pageDateStr);
+						website.setPageDate(pageDate);
+					}
 					log.info("over url:{}", url);
 				} catch (Exception e) {
+					website.setTitle("访问失败");
 					log.error(e.getMessage() + "url:" + url);
 				}
 			}).collect(Collectors.toList());
 			log.info("end analysis");
+			websiteService.deleteAll();
 			websiteService.saveAll(websites);
 //			websiteService.createIndexer();
 		}

@@ -1,5 +1,7 @@
 package com.bookmark.analysis.services;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import com.bookmark.analysis.dao.BaseDao;
 import com.bookmark.analysis.dao.WebsiteDao;
 import com.bookmark.analysis.entity.Website;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.net.SocketException;
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -99,5 +102,10 @@ public class WebsiteService extends BaseService<Website, Long> {
 			log.error(e.getMessage() + "url:" + url);
 		}
 		return website;
+	}
+
+	public static void main(String[] args) throws ParseException {
+		String temp = "Fri, 22 May 2020 19:36:40 GMT";
+		System.out.println(DatePattern.HTTP_DATETIME_FORMAT.parse(temp));
 	}
 }

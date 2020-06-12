@@ -62,6 +62,11 @@
             <artifactId>jsoup</artifactId>
             <version>1.12.1</version>
         </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.3.7</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.hankcs.nlp/hanlp-lucene-plugin -->
         <!-- 分词器 -->
         <dependency>

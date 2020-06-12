@@ -124,6 +124,10 @@ public abstract class BaseService<T extends BaseEntity, ID extends Serializable>
 		this.getDao().deleteById(id);
 	}
 
+	public void deleteAll() {
+		this.getDao().deleteAll();
+	}
+
 
 	public void deleteByIds(@SuppressWarnings("unchecked") ID... ids) {
 		if (ids != null) {
