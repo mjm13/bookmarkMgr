@@ -9,7 +9,7 @@
 <body>
 <div class="layui-container" style="margin: 0px;width: 100%;">
 	<div class="layui-row" style="margin-top: 10px;">
-		<div class="layui-col-md6 layui-col-lg-offset4">
+		<div class="layui-col-md6">
 			<div class="layui-input-inline">
 				<input autocomplete="off" class="layui-input" id="keyword"
 					   name="keyword" placeholder="关键字" style="height: 30px;width: 250px;" type="text">
@@ -19,6 +19,9 @@
 			</button>
 			<button class="layui-btn layui-btn-normal layui-btn-sm" id="uploadBtn" style="margin-left: 0px;" type="button">
 				<i class="layui-icon layui-icon-upload "></i>
+			</button>
+			<button class="layui-btn layui-btn-normal layui-btn-sm" id="analysisBtn" style="margin-left: 0px;" type="button">
+				<i class="layui-icon layui-icon-link"></i>
 			</button>
 		</div>
 	</div>
@@ -68,11 +71,20 @@
                 where: {"keyword": keyword}
             });
         });
+        
+		$("#analysisBtn").click(function () {
+			var keyword = $("#keyword").val();
+			$.post(_baseUrl + "analysis"
+					,{"keyword": keyword}
+					,function (result) {
+						layer.msg(result.msg, {icon:1, time: 1000});
+					}
+			);
+		});
 
         $(document).keydown(function (event) {
             if (event.keyCode == 13) {
                 var keyword = $("#keyword").val();
-                debugger;
                 table.reload("bookMarkTable", {
                     where: {"keyword": keyword}
                 });
@@ -87,11 +99,13 @@
             , size: "sm"
             , height: 'full-60'
             , cols: [[
-                 // {field: 'remark', title: '备注', minWidth: 80}
-                {field: 'iconCol', title: '网址', templet: "#iconCol", minWidth: 80}
-                // , {field: 'title', title: '标题', minWidth: 80}
-                // , {field: 'description', title: '描述', minWidth: 80}
-                // , {field: 'keywords', title: '关键字', minWidth: 80}
+				{title: '序号', fixed: 'left', type: 'numbers'}
+				,{field: 'remark', title: '备注', minWidth: 80}
+                ,{field: 'iconCol', title: '网址', templet: "#iconCol", minWidth: 80}
+                , {field: 'title', title: '标题', minWidth: 80}
+                , {field: 'description', title: '描述', minWidth: 80}
+                , {field: 'keywords', title: '关键字11', minWidth: 80}
+				,{field: 'url', title: 'url'}
             ]]
         });
 

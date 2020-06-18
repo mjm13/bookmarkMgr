@@ -32,3 +32,5 @@ build/
 /.mvn/wrapper
 /mvnw
 /mvnw.cmd
+/logs/*.log
+/logs/*.gz

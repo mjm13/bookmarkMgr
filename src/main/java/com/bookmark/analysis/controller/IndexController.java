@@ -23,12 +23,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.net.ssl.*;
 import javax.persistence.criteria.Predicate;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +45,37 @@ import java.util.stream.Collectors;
 public class IndexController {
 	@Autowired
 	private WebsiteService websiteService;
+
+	static {
+		try {
+			// 重置HttpsURLConnection的DefaultHostnameVerifier，使其对任意站点进行验证时都返回true
+			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+				public boolean verify(String hostname, SSLSession session) {
+					return true;
+				}
+			});
+			// 创建随机证书生成工厂
+			//SSLContext context = SSLContext.getInstance("TLS");
+			SSLContext context = SSLContext.getInstance("TLSv1.2");
+				context.init(null, new X509TrustManager[] { new X509TrustManager() {
+				public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+				}
+
+				public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+				}
+
+				public X509Certificate[] getAcceptedIssuers() {
+					return new X509Certificate[0];
+				}
+			} }, new SecureRandom());
+
+			// 重置httpsURLConnection的DefaultSSLSocketFactory， 使其生成随机证书
+			HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 
 	@RequestMapping("/")
 	public ModelAndView index(Model model, HttpSession session) {
@@ -68,23 +103,21 @@ public class IndexController {
 	public ResponseEntity<Map<String, Object>> bookMarkList(String keyword) {
 //		List<Website> websites = websiteService.search(keyword);
 		keyword = keyword.replaceAll(",","");
-		Pageable pageable = PageRequest.of(0, 100);
-		String finalKeyword = keyword;
-		List<Website> websites = websiteService.findAll((root, criteriaQuery, criteriaBuilder) -> {
-			List<Predicate> predicates = new ArrayList<>();
-			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("title"), ""), "%" + finalKeyword + "%"));
-			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("remark"), ""), "%" + finalKeyword + "%"));
-			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("description"), ""), "%" + finalKeyword + "%"));
-			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("keywords"), ""), "%" + finalKeyword + "%"));
-			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("domain"), ""), "%" + finalKeyword + "%"));
-			predicates.add(criteriaBuilder.like(criteriaBuilder.coalesce(root.get("domainTitle"), ""), "%" + finalKeyword + "%"));
-			return criteriaBuilder.or(predicates.toArray(new Predicate[predicates.size()]));
-		},pageable).getContent();
+		List<Website> websites = websiteService.findByKeyword(keyword);
 
 		Map<String, Object> result = new HashMap<>();
 		result.put("data", websites);
 		result.put("count", websites.size());
 		result.put("code", "0");
+		return ResponseEntity.ok(result);
+	}
+
+	@RequestMapping(value = "/analysis")
+	public ResponseEntity<Map<String, Object>> analysis(String keyword) {
+		List<Website> websites = websiteService.findByKeyword(keyword);
+		websiteService.analysisWebsites(websites);
+		Map<String, Object> result = new HashMap<>();
+		result.put("msg", "操作中");
 		return ResponseEntity.ok(result);
 	}
 
@@ -122,7 +155,14 @@ public class IndexController {
 			websites = websites.stream().parallel().peek(website -> {
 				String url = website.getUrl();
 				try {
-					Connection connect = Jsoup.connect(url).userAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31");;
+					Connection connect = Jsoup.connect(url);
+					connect.timeout(3000);
+					connect.header("Accept-Encoding", "gzip,deflate,sdch");
+					connect.header("Connection", "close");
+					if (connect instanceof HttpsURLConnection) {
+						HttpsURLConnection https = (HttpsURLConnection)connect;
+
+					}
 					Document doc = connect.get();
 
 					Connection.Response response = connect.response();
@@ -163,7 +203,7 @@ public class IndexController {
 				}
 			}).collect(Collectors.toList());
 			log.info("end analysis");
-			websiteService.deleteAll();
+//			websiteService.deleteAll();
 			websiteService.saveAll(websites);
 //			websiteService.createIndexer();
 		}
