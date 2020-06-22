@@ -4,11 +4,22 @@ import com.bookmark.analysis.entity.BaseEntity;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.X509TrustManager;
 import java.beans.PropertyDescriptor;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
@@ -183,4 +194,26 @@ public class ExBeanUtil {
 		return map;
 	}
 
+	public static void main(String[] args) throws IOException, KeyManagementException, NoSuchAlgorithmException {
+		SSLContext context = SSLContext.getInstance("TLS");
+		context.init(null, new X509TrustManager[]{new X509TrustManager() {
+			public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+			}
+
+			public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+			}
+
+			public X509Certificate[] getAcceptedIssuers() {
+				return new X509Certificate[0];
+			}
+		}}, new SecureRandom());
+		HttpsURLConnection.setDefaultSSLSocketFactory(context.getSocketFactory());
+		Document doc = Jsoup.connect("https://withpinbox.com/explore")
+				.userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36")
+				.timeout(3000)
+				.ignoreHttpErrors(true)
+				.get();
+
+		System.out.println("over:"+doc.title());
+	}
 }

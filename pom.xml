@@ -59,8 +59,8 @@
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
+            <version>1.13.1</version>
             <artifactId>jsoup</artifactId>
-            <version>1.12.1</version>
         </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>

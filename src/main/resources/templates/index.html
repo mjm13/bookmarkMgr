@@ -1,35 +1,117 @@
 <!DOCTYPE html>
 <html lang="zh_CN" xmlns:th="http://www.thymeleaf.org">
 <head>
-	<link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
-	<meta charset="UTF-8">
-	<title>搜索</title>
-	<link media="all" rel="stylesheet" th:href="@{/layui/css/layui.css}">
+    <link rel="icon" th:href="@{/favicon.ico}" type="image/x-icon">
+    <meta charset="UTF-8">
+    <title>搜索</title>
+    <link media="all" rel="stylesheet" th:href="@{/layui/css/layui.css}">
+    <link media="all" rel="stylesheet" th:href="@{/layui-dropdown/dropdown.css}">
 </head>
+<style>
+    .layui-input-sm,.layui-select-sm,.layui-textarea-sm
+    {
+        width:150px;
+        height:30px;
+        line-height:1;
+        border-width:1px;
+        border-style:solid;
+        background-color:#fff;
+        border-radius:2px;
+        border-color:#e6e6e6;
+        padding-left: 5px;
+    }
+    .layui-form-item-sm .layui-input-inline-sm {
+        float: left;
+        width: 100px;
+        margin-right: 5px;
+    }
+    .layui-input-inline-sm {
+        display: inline-block;
+        vertical-align: middle;
+        position: relative;
+    }
+    .layui-form-label-sm {
+        float: left;
+        display: block;
+        padding: 0px 8px;
+        width: 60px;
+        font-weight: 400;
+        /* line-height: 24px; */
+        text-align: right;
+        position: relative;
+    }
+    .layui-card-header-sm {
+        position: relative;
+        /* height: 42px; */
+        line-height: 28px;
+        color: rgb(51, 51, 51);
+        font-size: 14px;
+        padding: 10px 15px;
+        border-bottom: 1px solid rgb(246, 246, 246);
+        border-radius: 2px 2px 0px 0px;
+    }
+
+    .layui-select-title > input {
+        width:100px;
+        height:25px;
+        line-height:1;
+        border-width:1px;
+        border-style:solid;
+        background-color:#fff;
+        border-radius:2px;
+        border-color:#e6e6e6;
+        padding-left: 5px;
+    }
+    .layui-pop-search {
+        cursor: pointer
+    }
+</style>
 <body>
 <div class="layui-container" style="margin: 0px;width: 100%;">
-	<div class="layui-row" style="margin-top: 10px;">
-		<div class="layui-col-md6">
-			<div class="layui-input-inline">
-				<input autocomplete="off" class="layui-input" id="keyword"
-					   name="keyword" placeholder="关键字" style="height: 30px;width: 250px;" type="text">
-			</div>
-			<button class="layui-btn layui-btn-sm" id="searchBtn" type="button">
-				<i class="layui-icon layui-icon-search "></i>
-			</button>
-			<button class="layui-btn layui-btn-normal layui-btn-sm" id="uploadBtn" style="margin-left: 0px;" type="button">
-				<i class="layui-icon layui-icon-upload "></i>
-			</button>
-			<button class="layui-btn layui-btn-normal layui-btn-sm" id="analysisBtn" style="margin-left: 0px;" type="button">
-				<i class="layui-icon layui-icon-link"></i>
-			</button>
-		</div>
-	</div>
-	<div class="layui-row">
-		<table class="layui-hide" id="bookMarkTable"></table>
-	</div>
+    <form class="layui-form" id="searchForm">
+        <div class="layui-row" style="margin-top: 10px;">
+            <div class="layui-input-inline">
+                <input autocomplete="off" class="layui-input layui-input-sm" id="keyword"
+                       name="keyword" placeholder="关键字" type="text">
+            </div>
+            <div class="layui-input-inline">
+                <input type="text" name="remark" placeholder="备注" autocomplete="off" class="layui-input layui-input-sm">
+            </div>
+            <div class="layui-input-inline">
+                <input type="text" name="title" placeholder="标题" autocomplete="off" class="layui-input layui-input-sm">
+            </div>
+            <div class="layui-input-inline">
+                <input type="text" name="url" placeholder="url" autocomplete="off" class="layui-input layui-input-sm">
+            </div>
+            <div class="layui-input-inline">
+                <input type="text" name="description" placeholder="描述" autocomplete="off" class="layui-input layui-input-sm">
+            </div>
+            <div class="layui-input-inline">
+                <input type="text" name="keywords" placeholder="关键字" autocomplete="off" class="layui-input layui-input-sm">
+            </div>
+            <div class="layui-input-inline">
+                <input type="text" name="domain" placeholder="域名" autocomplete="off" class="layui-input layui-input-sm">
+            </div>
+            <button class="layui-btn layui-btn-sm" id="searchBtn" type="button">
+                <i class="layui-icon layui-icon-search "></i>
+            </button>
+            <button class="layui-btn layui-btn-normal layui-btn-sm" id="uploadBtn" style="margin-left: 0px;"
+                    type="button">
+                <i class="layui-icon layui-icon-upload "></i>
+            </button>
+            <button class="layui-btn layui-btn-warm layui-btn-sm" id="analysisBtn" style="margin-left: 0px;"
+                    type="button">
+                <i class="layui-icon layui-icon-link"></i>
+            </button>
+        </div>
+    </form>
+    <div class="layui-row">
+        <table class="layui-hide" id="bookMarkTable"></table>
+    </div>
 </div>
 </body>
+<script charset="utf-8" th:src="@{/jquery.min.js}"></script>
+<script charset="utf-8" th:src="@{/jquery.serializejson.js}"></script>
 <script charset="utf-8" th:src="@{/layui/layui.js}"></script>
 <script th:inline="javascript">
     /*<![CDATA[*/
@@ -38,24 +120,24 @@
     /*]]>*/
 </script>
 <script id="iconCol" type="text/html">
-	<a href="{{d.url}}" target="_blank" style="color: cornflowerblue;display: block;width: 100%;">
-		{{#  if(d.icon != "" && d.icon != null){ }}
-		<img src="{{d.icon}}" style="width: 16px;">
-		{{#  } }}
-		{{# if(d.title != "" && d.title != null){ }}
-		{{d.title}}
-		{{# }else{ }}
-		{{d.url}}
-		{{# } }}
-	</a>
+    <a href="{{d.url}}" target="_blank" style="color: cornflowerblue;display: block;width: 100%;">
+        {{# if(d.icon != "" && d.icon != null){ }}
+        <img src="{{d.icon}}" style="width: 16px;">
+        {{# } }}
+        {{# if(d.title != "" && d.title != null){ }}
+        {{d.title}}
+        {{# }else{ }}
+        {{d.url}}
+        {{# } }}
+    </a>
 
 </script>
 <script th:inline="none" type="text/javascript">
-    layui.use(['upload', 'table'], function () {
-        var $ = layui.jquery;
-        var upload = layui.upload;
-        var table = layui.table;
-
+    layui.config({
+        base: _baseUrl + 'layui-dropdown/'
+    }).extend({
+        dropdown: 'dropdown'
+    }).use(['upload', 'table', 'dropdown'], function (upload, table, dropdown) {
         upload.render({
             elem: '#uploadBtn'
             , url: _baseUrl + 'upload'
@@ -66,27 +148,29 @@
         });
 
         $("#searchBtn").click(function () {
-            var keyword = $("#keyword").val();
+            var param = $("#searchForm").serializeJSON();
             table.reload("bookMarkTable", {
-                where: {"keyword": keyword}
+                where: param
+                , url: _baseUrl + "list"
             });
         });
-        
-		$("#analysisBtn").click(function () {
-			var keyword = $("#keyword").val();
-			$.post(_baseUrl + "analysis"
-					,{"keyword": keyword}
-					,function (result) {
-						layer.msg(result.msg, {icon:1, time: 1000});
-					}
-			);
-		});
+
+        $("#analysisBtn").click(function () {
+            var param = $("#searchForm").serializeJSON();
+            $.post(_baseUrl + "analysis"
+                , param
+                , function (result) {
+                    layer.msg(result.msg, {icon: 1, time: 1000});
+                }
+            );
+        });
 
         $(document).keydown(function (event) {
             if (event.keyCode == 13) {
-                var keyword = $("#keyword").val();
+                var param = $("#searchForm").serializeJSON();
                 table.reload("bookMarkTable", {
-                    where: {"keyword": keyword}
+                    where: param
+                    , url: _baseUrl + "list"
                 });
                 return false;
             }
@@ -95,17 +179,18 @@
         table.render({
             elem: '#bookMarkTable'
             , id: 'bookMarkTable'
-            , url: _baseUrl + "list?keyword="
+            , data: []
             , size: "sm"
             , height: 'full-60'
+            , page:true
             , cols: [[
-				{title: '序号', fixed: 'left', type: 'numbers'}
-				,{field: 'remark', title: '备注', minWidth: 80}
-                ,{field: 'iconCol', title: '网址', templet: "#iconCol", minWidth: 80}
+                {title: '序号', fixed: 'left', type: 'numbers'}
+                , {field: 'remark', title: '备注', minWidth: 80}
+                , {field: 'iconCol', title: '网址', templet: "#iconCol", minWidth: 80}
                 , {field: 'title', title: '标题', minWidth: 80}
                 , {field: 'description', title: '描述', minWidth: 80}
-                , {field: 'keywords', title: '关键字11', minWidth: 80}
-				,{field: 'url', title: 'url'}
+                , {field: 'keywords', title: '关键字', minWidth: 80}
+                , {field: 'url', title: 'url'}
             ]]
         });
 
