@@ -8,28 +8,30 @@
     <link media="all" rel="stylesheet" th:href="@{/layui-dropdown/dropdown.css}">
 </head>
 <style>
-    .layui-input-sm,.layui-select-sm,.layui-textarea-sm
-    {
-        width:150px;
-        height:30px;
-        line-height:1;
-        border-width:1px;
-        border-style:solid;
-        background-color:#fff;
-        border-radius:2px;
-        border-color:#e6e6e6;
+    .layui-input-sm, .layui-select-sm, .layui-textarea-sm {
+        width: 150px;
+        height: 30px;
+        line-height: 1;
+        border-width: 1px;
+        border-style: solid;
+        background-color: #fff;
+        border-radius: 2px;
+        border-color: #e6e6e6;
         padding-left: 5px;
     }
+
     .layui-form-item-sm .layui-input-inline-sm {
         float: left;
         width: 100px;
         margin-right: 5px;
     }
+
     .layui-input-inline-sm {
         display: inline-block;
         vertical-align: middle;
         position: relative;
     }
+
     .layui-form-label-sm {
         float: left;
         display: block;
@@ -40,6 +42,7 @@
         text-align: right;
         position: relative;
     }
+
     .layui-card-header-sm {
         position: relative;
         /* height: 42px; */
@@ -52,16 +55,17 @@
     }
 
     .layui-select-title > input {
-        width:100px;
-        height:25px;
-        line-height:1;
-        border-width:1px;
-        border-style:solid;
-        background-color:#fff;
-        border-radius:2px;
-        border-color:#e6e6e6;
+        width: 100px;
+        height: 25px;
+        line-height: 1;
+        border-width: 1px;
+        border-style: solid;
+        background-color: #fff;
+        border-radius: 2px;
+        border-color: #e6e6e6;
         padding-left: 5px;
     }
+
     .layui-pop-search {
         cursor: pointer
     }
@@ -75,22 +79,27 @@
                        name="keyword" placeholder="关键字" type="text">
             </div>
             <div class="layui-input-inline">
-                <input type="text" name="remark" placeholder="备注" autocomplete="off" class="layui-input layui-input-sm">
+                <input type="text" name="remark" placeholder="备注" autocomplete="off"
+                       class="layui-input layui-input-sm">
             </div>
             <div class="layui-input-inline">
-                <input type="text" name="title" placeholder="标题" autocomplete="off" class="layui-input layui-input-sm">
+                <input type="text" name="title" placeholder="标题" autocomplete="off"
+                       class="layui-input layui-input-sm">
             </div>
             <div class="layui-input-inline">
                 <input type="text" name="url" placeholder="url" autocomplete="off" class="layui-input layui-input-sm">
             </div>
             <div class="layui-input-inline">
-                <input type="text" name="description" placeholder="描述" autocomplete="off" class="layui-input layui-input-sm">
+                <input type="text" name="description" placeholder="描述" autocomplete="off"
+                       class="layui-input layui-input-sm">
             </div>
             <div class="layui-input-inline">
-                <input type="text" name="keywords" placeholder="关键字" autocomplete="off" class="layui-input layui-input-sm">
+                <input type="text" name="keywords" placeholder="关键字" autocomplete="off"
+                       class="layui-input layui-input-sm">
             </div>
             <div class="layui-input-inline">
-                <input type="text" name="domain" placeholder="域名" autocomplete="off" class="layui-input layui-input-sm">
+                <input type="text" name="domain" placeholder="域名" autocomplete="off"
+                       class="layui-input layui-input-sm">
             </div>
             <button class="layui-btn layui-btn-sm" id="searchBtn" type="button">
                 <i class="layui-icon layui-icon-search "></i>
@@ -150,27 +159,30 @@
         $("#searchBtn").click(function () {
             var param = $("#searchForm").serializeJSON();
             table.reload("bookMarkTable", {
-                where: param
-                , url: _baseUrl + "list"
+                where: JSON.stringify(param)
             });
         });
 
         $("#analysisBtn").click(function () {
             var param = $("#searchForm").serializeJSON();
-            $.post(_baseUrl + "analysis"
-                , param
-                , function (result) {
+            debugger;
+            $.ajax({
+                url:_baseUrl + "analysis",
+                type:"post",
+                data:JSON.stringify(param),
+                dataType:"json",
+                contentType: 'application/json',
+                success:function(data){
                     layer.msg(result.msg, {icon: 1, time: 1000});
                 }
-            );
+            });
         });
 
         $(document).keydown(function (event) {
             if (event.keyCode == 13) {
                 var param = $("#searchForm").serializeJSON();
                 table.reload("bookMarkTable", {
-                    where: param
-                    , url: _baseUrl + "list"
+                    where: JSON.stringify(param)
                 });
                 return false;
             }
@@ -179,10 +191,12 @@
         table.render({
             elem: '#bookMarkTable'
             , id: 'bookMarkTable'
+            , url: _baseUrl + "list"
             , data: []
+            , limit: 30
             , size: "sm"
             , height: 'full-60'
-            , page:true
+            , page: true
             , cols: [[
                 {title: '序号', fixed: 'left', type: 'numbers'}
                 , {field: 'remark', title: '备注', minWidth: 80}
@@ -191,7 +205,10 @@
                 , {field: 'description', title: '描述', minWidth: 80}
                 , {field: 'keywords', title: '关键字', minWidth: 80}
                 , {field: 'url', title: 'url'}
-            ]]
+                , {field: 'loadResult', title: '分析结果'}
+            ]],
+            method: 'POST',
+            contentType: 'application/json'
         });
 
     });

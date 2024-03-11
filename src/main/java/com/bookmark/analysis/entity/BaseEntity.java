@@ -37,7 +37,9 @@ public abstract class BaseEntity<ID extends Serializable> implements Serializabl
 	@CreatedDate
 	private Date createdDate;
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private ID id;
+	
 	@LastModifiedDate
 	private Date lastModifiedDate;
 

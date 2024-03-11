@@ -1,5 +1,6 @@
 package com.bookmark.analysis.controller;
 
+import com.bookmark.analysis.dto.WebsiteQueryDto;
 import com.bookmark.analysis.entity.Website;
 import com.bookmark.analysis.services.WebsiteService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,13 +10,11 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -32,7 +31,7 @@ import java.util.*;
  * 按title查询
  * select  t.remark,t.title,t.url from website t where t.domain is null and t.title = '';
  **/
-@Controller
+@RestController
 @Slf4j
 public class IndexController {
     @Autowired
@@ -43,22 +42,22 @@ public class IndexController {
         return new ModelAndView("/index");
     }
 
-    @RequestMapping(value = "/list")
+    @PostMapping(value = "/list")
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> bookMarkList(@RequestParam Map<String, String> param) {
-        List<Website> websites = websiteService.findByParam(param);
+    public ResponseEntity<Map<String, Object>> bookMarkList(@RequestBody WebsiteQueryDto param) {
+        Page<Website> websites = websiteService.findByPage(param);
 
         Map<String, Object> result = new HashMap<>();
-        result.put("data", websites);
-        result.put("count", websites.size());
+        result.put("data", websites.getContent());
+        result.put("count", websites.getTotalElements());
         result.put("code", "0");
         return ResponseEntity.ok(result);
     }
 
-    @RequestMapping(value = "/analysis")
-    public ResponseEntity<Map<String, Object>> analysis(@RequestParam Map<String, String> param) {
-        List<Website> websites = websiteService.findByParam(param);
-        websiteService.analysisWebsites(websites);
+    @PostMapping(value = "/analysis")
+    public ResponseEntity<Map<String, Object>> analysis(@RequestBody WebsiteQueryDto param) {
+//        List<Website> websites = websiteService.findByParam(param);
+        websiteService.analysisWebsites(param);
         Map<String, Object> result = new HashMap<>();
         result.put("msg", "操作中");
         return ResponseEntity.ok(result);
@@ -80,7 +79,7 @@ public class IndexController {
                 String last_modified = a.attr("last_modified");
                 String title = a.ownText();
                 Website website = new Website();
-                website.setId(UUID.randomUUID().toString());
+//                website.setId(UUID.randomUUID().toString());
                 website.setUrl(href);
                 website.setRemark(title);
                 website.setCreatedDate(new Date(Long.valueOf(add_date) * 1000));

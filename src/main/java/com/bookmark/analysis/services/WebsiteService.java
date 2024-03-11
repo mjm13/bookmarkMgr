@@ -1,9 +1,11 @@
 package com.bookmark.analysis.services;
 
 import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.util.StrUtil;
 import com.bookmark.analysis.common.util.SSLHelper;
 import com.bookmark.analysis.dao.BaseDao;
 import com.bookmark.analysis.dao.WebsiteDao;
+import com.bookmark.analysis.dto.WebsiteQueryDto;
 import com.bookmark.analysis.entity.Website;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -15,20 +17,19 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import javax.net.ssl.*;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.net.URL;
-import java.security.cert.X509Certificate;
-import java.text.ParseException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.bookmark.analysis.common.util.SSLHelper.USER_AGENT;
 
@@ -81,16 +82,15 @@ public class WebsiteService extends BaseService<Website, Long> {
 //    }
 
 
-    public List<Website> findByParam(Map<String, String> param) {
-        List<Website> websites = findAll((root, criteriaQuery, criteriaBuilder) -> {
-            String keyword = param.get("keyword");
-            keyword = "%"+keyword.toLowerCase()+"%";
-            String remark = param.get("remark");
-            String title = param.get("title");
-            String url = param.get("url");
-            String description = param.get("description");
-            String domain = param.get("domain");
-            String keywords = param.get("keywords");
+    public Page<Website> findByPage(WebsiteQueryDto param) {
+        Page<Website> websites = findAll((root, criteriaQuery, criteriaBuilder) -> {
+            String keyword = param.getKeyword();
+            String remark = param.getRemark();
+            String title = param.getTitle();
+            String url = param.getUrl();
+            String description = param.getDescription();
+            String domain = param.getDomain();
+            String keywords = param.getKeywords();
 
             List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.isNotBlank(remark)) {
@@ -116,14 +116,17 @@ public class WebsiteService extends BaseService<Website, Long> {
 
             Predicate condition = criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
             if (StringUtils.isNotBlank(keyword)) {
+                keyword = "%"+keyword.toLowerCase()+"%";
                 List<Predicate> orpres = genLikePredicates(root,criteriaBuilder,keyword,"title","remark","description","keywords","domain","domainTitle","url");
                 Predicate key = criteriaBuilder.or(orpres.toArray(new Predicate[orpres.size()]));
                 condition = criteriaBuilder.and(condition, key);
             }
             return condition;
-        });
+        }, PageRequest.of(param.getPage() - 1, param.getLimit() ,Sort.by("pageDate").descending()));
         return websites;
     }
+
+
 
     private List<Predicate> genLikePredicates(Root root, CriteriaBuilder criteriaBuilder,String keyword, String... props){
         List<Predicate> orpres = new ArrayList<>();
@@ -134,10 +137,15 @@ public class WebsiteService extends BaseService<Website, Long> {
     }
 
     @Async
-    public void analysisWebsites(List<Website> websites) {
+    public void analysisWebsites(WebsiteQueryDto param) {
         SSLHelper.init();
-        websites.stream().parallel().forEach(website -> {
+        param.setLimit(100000);
+        param.setPage(1);
+        findByPage(param).getContent().stream().parallel().forEach(website -> {
             String url = website.getUrl();
+            if(!url.startsWith("http") || StrUtil.isNotBlank(website.getIcon())){
+                return;
+            }
             try {
                 Connection connect = Jsoup.connect(url).userAgent(USER_AGENT);
                 connect.timeout(3000);
@@ -183,6 +191,7 @@ public class WebsiteService extends BaseService<Website, Long> {
                 log.info("over url:{}", url);
             } catch (Exception e) {
                 website.setTitle(e.getMessage());
+                website.setLoadResult("访问网址异常");
                 log.error(e.getMessage() + "url:" + url);
             }
             websiteDao.save(website);

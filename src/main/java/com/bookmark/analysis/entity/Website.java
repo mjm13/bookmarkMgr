@@ -1,8 +1,8 @@
 package com.bookmark.analysis.entity;
 
 import lombok.Data;
-import org.hibernate.search.annotations.Field;
-import org.hibernate.search.annotations.Indexed;
+//import org.hibernate.search.annotations.Field;
+//import org.hibernate.search.annotations.Indexed;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -12,21 +12,21 @@ import java.util.Date;
  * @author mjm
  * @createtime 2019/11/8-9:35
  **/
-@Indexed(index = "website")
+//@Indexed(index = "website")
 @Entity
 @Data
 //@Analyzer(impl = HanLPAnalyzer.class)
-@Table(name = "website")
-public class Website extends BaseEntity<String> {
-	@Field
+//@Table(name = "website")
+public class Website extends BaseEntity<Long> {
+//	@Field
 	private String description;
-	@Field
+//	@Field
 	private String keywords;
-	@Field
+//	@Field
 	private String remark;
-	@Field
+//	@Field
 	private String title;
-	@Field
+//	@Field
 	private String url;
 
 	private String domain;
@@ -36,4 +36,8 @@ public class Website extends BaseEntity<String> {
 	private String icon;
 
 	private Date pageDate;
+	
+	private String bookMarkPath;
+	
+	private String loadResult;
 }

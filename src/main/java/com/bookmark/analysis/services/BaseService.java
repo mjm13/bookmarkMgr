@@ -1,6 +1,5 @@
 package com.bookmark.analysis.services;
 
-import com.bookmark.analysis.common.bean.ExPage;
 import com.bookmark.analysis.common.util.ExBeanUtil;
 import com.bookmark.analysis.dao.BaseDao;
 import com.bookmark.analysis.entity.BaseEntity;
@@ -64,32 +63,19 @@ public abstract class BaseService<T extends BaseEntity, ID extends Serializable>
 		return this.getDao().findAll(pageable);
 	}
 
-	public Page<T> findAll(ExPage exPage) {
-		Pageable pageable = PageRequest.of(exPage.getPage() - 1, exPage.getLimit());
-		return this.getDao().findAll(pageable);
-	}
 
-	public Page<T> findAll(ExPage exPage, Specification<T> specification) {
-		Pageable pageable = PageRequest.of(exPage.getPage() - 1, exPage.getLimit());
-		return this.getDao().findAll(specification, pageable);
-	}
+
+
 
 	public Page<T> findAll(Specification<T> specification, Pageable pageable) {
 		return this.getDao().findAll(specification, pageable);
 	}
 
-	public Page<T> findAll(ExPage exPage, Specification<T> specification, Sort sort) {
-		Pageable pageable = PageRequest.of(exPage.getPage() - 1, exPage.getLimit(), sort);
+	public Page<T> findAll(Specification<T> specification,Pageable pageable, Sort sort) {
 		return this.getDao().findAll(specification, pageable);
 	}
 
-	public List<T> findAll(Specification<T> specification, Sort sort) {
-		return this.getDao().findAll(specification, sort);
-	}
 
-	public List<T> findAll(Specification<T> specification) {
-		return this.getDao().findAll(specification);
-	}
 
 
 	public long count() {
@@ -166,18 +152,5 @@ public abstract class BaseService<T extends BaseEntity, ID extends Serializable>
 	public boolean exists(Example<T> example) {
 		return this.getDao().exists(example);
 	}
-
-	public ExPage getExportExPage(ExPage exPage) {
-		exPage.setPage(1);
-		exPage.setLimit(exportExcelMaxData);
-		return exPage;
-	}
-
-	public Pageable getPageableByEx(ExPage exPage) {
-		return PageRequest.of(exPage.getPage() - 1, exPage.getLimit());
-	}
-
-	public Pageable getPageableByEx(ExPage exPage, Sort sort) {
-		return PageRequest.of(exPage.getPage() - 1, exPage.getLimit(), sort);
-	}
+	
 }
