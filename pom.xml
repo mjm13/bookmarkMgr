@@ -25,26 +25,20 @@
             <artifactId>hibernate-entitymanager</artifactId>
         </dependency>
         <!-- Maven artifact identifier for Hibernate Search -->
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-search-orm</artifactId>
-            <version>5.11.3.Final</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.logging.log4j</groupId>
-                    <artifactId>log4j-slf4j-impl</artifactId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>solr-analysis-extras</artifactId>
-                    <groupId>org.apache.solr</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.lucene/lucene-core -->
 <!--        <dependency>-->
-<!--            <groupId>org.apache.lucene</groupId>-->
-<!--            <artifactId>lucene-core</artifactId>-->
-<!--            <version>8.0.0</version>-->
+<!--            <groupId>org.hibernate</groupId>-->
+<!--            <artifactId>hibernate-search-orm</artifactId>-->
+<!--            <version>5.11.3.Final</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.apache.logging.log4j</groupId>-->
+<!--                    <artifactId>log4j-slf4j-impl</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <artifactId>solr-analysis-extras</artifactId>-->
+<!--                    <groupId>org.apache.solr</groupId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
 <!--        </dependency>-->
 
         <dependency>
@@ -69,21 +63,21 @@
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.hankcs.nlp/hanlp-lucene-plugin -->
         <!-- 分词器 -->
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-analyzers-smartcn</artifactId>
-            <version>5.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-queryparser</artifactId>
-            <version>5.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.hankcs.nlp</groupId>
-            <artifactId>hanlp-lucene-plugin</artifactId>
-            <version>1.1.2</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.lucene</groupId>-->
+<!--            <artifactId>lucene-analyzers-smartcn</artifactId>-->
+<!--            <version>5.5.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.lucene</groupId>-->
+<!--            <artifactId>lucene-queryparser</artifactId>-->
+<!--            <version>5.5.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.hankcs.nlp</groupId>-->
+<!--            <artifactId>hanlp-lucene-plugin</artifactId>-->
+<!--            <version>1.1.2</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>

@@ -7,9 +7,9 @@ import com.bookmark.analysis.dao.WebsiteDao;
 import com.bookmark.analysis.entity.Website;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.search.jpa.FullTextEntityManager;
-import org.hibernate.search.jpa.Search;
-import org.hibernate.search.query.dsl.QueryBuilder;
+//import org.hibernate.search.jpa.FullTextEntityManager;
+//import org.hibernate.search.jpa.Search;
+//import org.hibernate.search.query.dsl.QueryBuilder;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -51,34 +51,34 @@ public class WebsiteService extends BaseService<Website, Long> {
         return websiteDao;
     }
 
-    public void createIndexer() {
-        try {
-            FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(entityManager);
-            fullTextEntityManager.createIndexer().startAndWait();
-        } catch (InterruptedException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
+//    public void createIndexer() {
+//        try {
+//            FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(entityManager);
+//            fullTextEntityManager.createIndexer().startAndWait();
+//        } catch (InterruptedException e) {
+//            log.error(e.getMessage(), e);
+//        }
+//    }
 
-    public List<Website> search(String text) {
-        // get the full text entity manager
-        FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(entityManager);
-        // create the query using Hibernate Search query DSL
-        QueryBuilder queryBuilder = fullTextEntityManager.getSearchFactory().buildQueryBuilder().forEntity(Website.class).get();
-        // a very basic query by keywords
-        org.apache.lucene.search.Query query =
-                queryBuilder
-                        .keyword()
-                        .onFields("description", "keywords", "remark", "title", "url")
-                        .matching(text)
-                        .createQuery();
-        // wrap Lucene query in an Hibernate Query object
-        org.hibernate.search.jpa.FullTextQuery jpaQuery = fullTextEntityManager.createFullTextQuery(query, Website.class);
-        jpaQuery.setMaxResults(100);
-
-        List<Website> results = jpaQuery.getResultList();
-        return results;
-    }
+//    public List<Website> search(String text) {
+//        // get the full text entity manager
+//        FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(entityManager);
+//        // create the query using Hibernate Search query DSL
+//        QueryBuilder queryBuilder = fullTextEntityManager.getSearchFactory().buildQueryBuilder().forEntity(Website.class).get();
+//        // a very basic query by keywords
+//        org.apache.lucene.search.Query query =
+//                queryBuilder
+//                        .keyword()
+//                        .onFields("description", "keywords", "remark", "title", "url")
+//                        .matching(text)
+//                        .createQuery();
+//        // wrap Lucene query in an Hibernate Query object
+//        org.hibernate.search.jpa.FullTextQuery jpaQuery = fullTextEntityManager.createFullTextQuery(query, Website.class);
+//        jpaQuery.setMaxResults(100);
+//
+//        List<Website> results = jpaQuery.getResultList();
+//        return results;
+//    }
 
 
     public List<Website> findByParam(Map<String, String> param) {
