@@ -30,6 +30,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.bookmark.analysis.common.util.SSLHelper.USER_AGENT;
 
@@ -141,7 +142,7 @@ public class WebsiteService extends BaseService<Website, Long> {
         SSLHelper.init();
         param.setLimit(100000);
         param.setPage(1);
-        findByPage(param).getContent().stream().parallel().forEach(website -> {
+        List<Website> datas  =  findByPage(param).getContent().stream().parallel().peek(website -> {
             String url = website.getUrl();
             if(!url.startsWith("http") || StrUtil.isNotBlank(website.getIcon())){
                 return;
@@ -194,9 +195,10 @@ public class WebsiteService extends BaseService<Website, Long> {
                 website.setLoadResult("访问网址异常");
                 log.error(e.getMessage() + "url:" + url);
             }
-            websiteDao.save(website);
-        });
+        }).collect(Collectors.toList());
 
+        websiteDao.saveAll(datas);
+        log.info("分析书签结束!");
     }
 
 }
