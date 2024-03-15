@@ -9,9 +9,6 @@ import com.bookmark.analysis.dto.WebsiteQueryDto;
 import com.bookmark.analysis.entity.Website;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-//import org.hibernate.search.jpa.FullTextEntityManager;
-//import org.hibernate.search.jpa.Search;
-//import org.hibernate.search.query.dsl.QueryBuilder;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -29,7 +26,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.bookmark.analysis.common.util.SSLHelper.USER_AGENT;
@@ -92,6 +91,7 @@ public class WebsiteService extends BaseService<Website, Long> {
             String description = param.getDescription();
             String domain = param.getDomain();
             String keywords = param.getKeywords();
+            String loadResult = param.getLoadResult();
 
             List<Predicate> predicates = new ArrayList<>();
             if (StringUtils.isNotBlank(remark)) {
@@ -114,22 +114,24 @@ public class WebsiteService extends BaseService<Website, Long> {
             if (StringUtils.isNotBlank(remark)) {
                 predicates.add(criteriaBuilder.like(root.get("keywords"), "%" + keywords + "%"));
             }
+            if (StringUtils.isNotBlank(loadResult)) {
+                predicates.add(criteriaBuilder.like(root.get("loadResult"), "%" + loadResult + "%"));
+            }
 
             Predicate condition = criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
             if (StringUtils.isNotBlank(keyword)) {
-                keyword = "%"+keyword.toLowerCase()+"%";
-                List<Predicate> orpres = genLikePredicates(root,criteriaBuilder,keyword,"title","remark","description","keywords","domain","domainTitle","url");
+                keyword = "%" + keyword.toLowerCase() + "%";
+                List<Predicate> orpres = genLikePredicates(root, criteriaBuilder, keyword, "title", "remark", "description", "keywords", "domain", "domainTitle", "url");
                 Predicate key = criteriaBuilder.or(orpres.toArray(new Predicate[orpres.size()]));
                 condition = criteriaBuilder.and(condition, key);
             }
             return condition;
-        }, PageRequest.of(param.getPage() - 1, param.getLimit() ,Sort.by("pageDate").descending()));
+        }, PageRequest.of(param.getPage() - 1, param.getLimit(), Sort.by("pageDate").descending()));
         return websites;
     }
 
 
-
-    private List<Predicate> genLikePredicates(Root root, CriteriaBuilder criteriaBuilder,String keyword, String... props){
+    private List<Predicate> genLikePredicates(Root root, CriteriaBuilder criteriaBuilder, String keyword, String... props) {
         List<Predicate> orpres = new ArrayList<>();
         for (String prop : props) {
             orpres.add(criteriaBuilder.like(criteriaBuilder.lower(root.get(prop)), keyword));
@@ -142,19 +144,21 @@ public class WebsiteService extends BaseService<Website, Long> {
         SSLHelper.init();
         param.setLimit(100000);
         param.setPage(1);
-        List<Website> datas  =  findByPage(param).getContent().stream().parallel().peek(website -> {
+        param.setLoadResult("访问网址异常");
+        List<Website> datas = findByPage(param).getContent().stream().parallel().peek(website -> {
             String url = website.getUrl();
-            if(!url.startsWith("http") || StrUtil.isNotBlank(website.getIcon())){
+            if (!url.startsWith("http") || StrUtil.isNotBlank(website.getIcon())) {
                 return;
             }
             try {
                 Connection connect = Jsoup.connect(url).userAgent(USER_AGENT);
                 connect.timeout(3000);
+                connect.proxy("127.0.0.1", 49776);
                 connect.ignoreHttpErrors(true);
-//				if(url.startsWith("https")){
-//                connect.followRedirects(true);
-                connect.timeout(60000);
-//				}
+                if (url.startsWith("https")) {
+                    connect.followRedirects(true);
+                    connect.timeout(60000);
+                }
                 Document doc = connect.get();
 
                 Connection.Response response = connect.response();
@@ -189,6 +193,7 @@ public class WebsiteService extends BaseService<Website, Long> {
                     Date pageDate = DatePattern.HTTP_DATETIME_FORMAT.parse(pageDateStr);
                     website.setPageDate(pageDate);
                 }
+                website.setLoadResult("采集结束");
                 log.info("over url:{}", url);
             } catch (Exception e) {
                 website.setTitle(e.getMessage());

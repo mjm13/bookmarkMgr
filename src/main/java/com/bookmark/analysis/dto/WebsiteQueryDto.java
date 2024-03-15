@@ -11,4 +11,5 @@ public class WebsiteQueryDto extends PageQueryDto{
     private String description;
     private String domain;
     private String keywords;
+    private String loadResult;
 }
