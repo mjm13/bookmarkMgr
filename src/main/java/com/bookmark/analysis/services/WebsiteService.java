@@ -206,4 +206,11 @@ public class WebsiteService extends BaseService<Website, Long> {
         log.info("分析书签结束!");
     }
 
+    /**
+     * 生成符合chrome规范的书签文件
+     * 查询Website并按bookMarkPath生成这些书签
+     */
+    public void createBookMark() {
+    }
+
 }
