@@ -40,4 +40,6 @@ public class Website extends BaseEntity<Long> {
 	private String bookMarkPath;
 	
 	private String loadResult;
+	
+	private Long websiteGroupId;
 }

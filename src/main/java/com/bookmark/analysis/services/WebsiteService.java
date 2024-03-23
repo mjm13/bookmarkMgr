@@ -153,7 +153,7 @@ public class WebsiteService extends BaseService<Website, Long> {
             try {
                 Connection connect = Jsoup.connect(url).userAgent(USER_AGENT);
                 connect.timeout(3000);
-                connect.proxy("127.0.0.1", 49776);
+                connect.proxy(param.getHost(), param.getProxy());
                 connect.ignoreHttpErrors(true);
                 if (url.startsWith("https")) {
                     connect.followRedirects(true);
